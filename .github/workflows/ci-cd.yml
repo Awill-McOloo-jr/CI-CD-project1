@@ -31,7 +31,7 @@ jobs:
       run: npm run test:coverage
       
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage/lcov.info
         flags: unittests
@@ -41,7 +41,7 @@ jobs:
       run: npm run build
       
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4  # Updated from v3 to v4
       with:
         name: build-files
         path: .next/
@@ -62,10 +62,28 @@ jobs:
         node-version: '18'
         cache: 'npm'
         
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4  # Updated from v3 to v4
+      with:
+        name: build-files
+        path: .next/
+        
     - name: Install Vercel CLI
       run: npm install --global vercel@latest
       
-    - name: Pull Vercel Environment Information
+    - name: Pull Vercel Environment Information (preview)
+      run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    - name: Pull Vercel Environment Information (preview, second time)
+      run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    - name: Pull Vercel Environment Information (production)
       run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       env:
         VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -99,6 +117,12 @@ jobs:
         node-version: '18'
         cache: 'npm'
         
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4  # Updated from v3 to v4
+      with:
+        name: build-files
+        path: .next/
+        
     - name: Install Vercel CLI
       run: npm install --global vercel@latest
       
@@ -107,15 +131,4 @@ jobs:
       env:
         VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
         VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        
-    - name: Build Project Artifacts
-      run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-      env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        
-    - name: Deploy Project Artifacts to Vercel
-      run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-      env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+     
